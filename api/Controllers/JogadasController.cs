@@ -1,4 +1,6 @@
-﻿using System;
+﻿using api.business;
+using api.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,30 +11,83 @@ namespace api.Controllers
 {
     public class JogadasController : ApiController
     {
-        public IEnumerable<string> Get()
+        private readonly JogadasBusiness jogadasBusiness;
+
+        public JogadasController()
         {
-            return new string[] { "value1", "value2" };
+            jogadasBusiness = new JogadasBusiness();
+        }
+
+        // GET api/<controller>
+        public IHttpActionResult Get()
+        {
+            try
+            {
+                var jogadas = jogadasBusiness.GetJogadas();
+                return Ok(jogadas);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+
         }
 
         // GET api/<controller>/5
-        public string Get(int id)
+        public IHttpActionResult Get(int id)
         {
-            return "value";
+            try
+            {
+                var jogada = jogadasBusiness.GetJogadaById(id);
+                return jogada == null ? (IHttpActionResult)NotFound() : Ok(jogada);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
         // POST api/<controller>
-        public void Post([FromBody] string value)
+        public IHttpActionResult Post([FromBody] Jogada jogada)
         {
+            try
+            {
+                jogadasBusiness.InsertNew(jogada);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
         // PUT api/<controller>/5
-        public void Put(int id, [FromBody] string value)
+        public IHttpActionResult Put([FromBody] Jogada jogada)
         {
+            try
+            {
+                jogadasBusiness.Update(jogada);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
         // DELETE api/<controller>/5
-        public void Delete(int id)
+        public IHttpActionResult Delete(int id)
         {
+            try
+            {
+                var jogadaToDelete = new Jogada { Id = id };
+                jogadasBusiness.Delete(jogadaToDelete);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
     }
 }

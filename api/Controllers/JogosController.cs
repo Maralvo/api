@@ -6,17 +6,16 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using System.Web.Http.Results;
 
 namespace api.Controllers
 {
-    public class UsuariosController : ApiController
+    public class JogosController : ApiController
     {
-        private readonly UsuariosBusiness usuariosBusiness;
+        private readonly JogosBusiness jogosBusiness;
 
-        public UsuariosController()
+        public JogosController()
         {
-            usuariosBusiness = new UsuariosBusiness();
+            jogosBusiness = new JogosBusiness();
         }
 
         // GET api/<controller>
@@ -24,14 +23,14 @@ namespace api.Controllers
         {
             try
             {
-                var users = usuariosBusiness.GetUsers();
-                return Ok(users);
+                var jogos = jogosBusiness.GetJogos();
+                return Ok(jogos);
             }
             catch (Exception ex)
             {
                 return InternalServerError(ex);
             }
-            
+
         }
 
         // GET api/<controller>/5
@@ -39,8 +38,8 @@ namespace api.Controllers
         {
             try
             {
-                var user = usuariosBusiness.GetUserById(id);
-                return user == null ? (IHttpActionResult) NotFound() : Ok(user);
+                var jogo = jogosBusiness.GetJogoById(id);
+                return jogo == null ? (IHttpActionResult)NotFound() : Ok(jogo);
             }
             catch (Exception ex)
             {
@@ -49,11 +48,11 @@ namespace api.Controllers
         }
 
         // POST api/<controller>
-        public IHttpActionResult Post([FromBody] Usuario usuario)
+        public IHttpActionResult Post([FromBody] Jogo jogo)
         {
             try
             {
-                usuariosBusiness.InsertNew(usuario);
+                jogosBusiness.InsertNew(jogo);
                 return Ok();
             }
             catch (Exception ex)
@@ -63,11 +62,11 @@ namespace api.Controllers
         }
 
         // PUT api/<controller>/5
-        public IHttpActionResult Put([FromBody] Usuario usuario)
+        public IHttpActionResult Put([FromBody] Jogo jogo)
         {
             try
             {
-                usuariosBusiness.Update(usuario);
+                jogosBusiness.Update(jogo);
                 return Ok();
             }
             catch (Exception ex)
@@ -81,8 +80,8 @@ namespace api.Controllers
         {
             try
             {
-                var userToDelete = new Usuario { Id = id };
-                usuariosBusiness.Delete(userToDelete);
+                var jogoToDelete = new Jogo { Id = id };
+                jogosBusiness.Delete(jogoToDelete);
                 return Ok();
             }
             catch (Exception ex)
