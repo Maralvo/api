@@ -10,11 +10,11 @@ namespace api.Models
         public int Id { get; set; }
         public Usuario Usuario { get; set; }
         public Jogo Jogo { get; set; }
-        public DateTime DataHora { get; set; }
-        public int Erros { get; set; }
-        public int Acertos { get; set; }
-        public int Pontos { get; set; }
-        public DateTime Tempo { get; set; }
-        public int Fases { get; set; }
+        public DateTime? DataHora { get; set; }
+        public int? Erros { get; set; }
+        public int? Acertos { get; set; }
+        public int? Pontos { get; set; }
+        public string Tempo { get; set; }
+        public int? Fases { get; set; }
     }
 }

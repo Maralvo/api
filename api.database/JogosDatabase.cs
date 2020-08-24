@@ -19,62 +19,43 @@ namespace api.database
         }
         public void Delete(Jogo jogo)
         {
-            using (var client = new SshClient(SSH_HOST, SSH_USER, SSH_PASSWORD))
+            using (var con = new MySqlConnection(builder.ConnectionString))
             {
-                client.Connect();
-                if (client.IsConnected)
+                con.Open();
+                using (var cmd = new MySqlCommand("delete from Jogos where ID_JOGO=@id", con))
                 {
-                    var portForwarded = new ForwardedPortLocal(BOUND_HOST, BOUND_PORT, HOST, PORT);
-                    client.AddForwardedPort(portForwarded);
-                    portForwarded.Start();
-                    using (var con = new MySqlConnection(CS))
-                    {
-                        using (var cmd = new MySqlCommand("delete from Jogos where ID_JOGO=@id", con))
-                        {
-                            cmd.CommandType = CommandType.Text;
-                            cmd.Parameters.Add(new MySqlParameter("id", jogo.Id));
-                            con.Open();
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-                    client.Disconnect();
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.Add(new MySqlParameter("id", jogo.Id));
+                    cmd.ExecuteNonQuery();
                 }
+                con.Close();
             }
         }
 
         public Jogo GetJogoById(int? id)
         {
-            using (var client = new SshClient(SSH_HOST, SSH_USER, SSH_PASSWORD))
+
+            using (var con = new MySqlConnection(builder.ConnectionString))
             {
-                client.Connect();
-                if (client.IsConnected)
+                con.Open();
+                using (var cmd = new MySqlCommand("select * from Jogos where ID_JOGO=@id", con))
                 {
-                    var portForwarded = new ForwardedPortLocal(BOUND_HOST, BOUND_PORT, HOST, PORT);
-                    client.AddForwardedPort(portForwarded);
-                    portForwarded.Start();
-                    using (var con = new MySqlConnection(CS))
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.Add(new MySqlParameter("id", id));
+                    var rdr = cmd.ExecuteReader();
+                    while (rdr.Read())
                     {
-                        using (var cmd = new MySqlCommand("select * from Jogos where ID_JOGO=@id", con))
+                        return new Jogo
                         {
-                            cmd.CommandType = CommandType.Text;
-                            cmd.Parameters.Add(new MySqlParameter("id", id));
-                            con.Open();
-                            var rdr = cmd.ExecuteReader();
-                            while (rdr.Read())
-                            {
-                                return new Jogo
-                                {
-                                    Id = Convert.ToInt32(rdr["ID_JOGO"]),
-                                    DataCriacao = Convert.ToDateTime(rdr["Data_Criacao"]),
-                                    Nome = Convert.ToString(rdr["Nome"]),
-                                    Versao = Convert.ToInt32(rdr["Versao"]),
-                                    Fases = Convert.ToInt32(rdr["Fases"]),
-                                };
-                            }
-                        }
+                            Id = Convert.ToInt32(rdr["ID_JOGO"]),
+                            DataCriacao = Convert.ToDateTime(rdr["Data_Criacao"]),
+                            Nome = Convert.ToString(rdr["Nome"]),
+                            Versao = Convert.ToInt32(rdr["Versao"]),
+                            Fases = Convert.ToInt32(rdr["Fases"]),
+                        };
                     }
-                    client.Disconnect();
                 }
+                con.Close();
             }
 
             return null;
@@ -83,92 +64,64 @@ namespace api.database
         public IList<Jogo> GetJogos()
         {
             var jogos = new List<Jogo>();
-            using (var client = new SshClient(SSH_HOST, SSH_USER, SSH_PASSWORD))
+
+            using (var con = new MySqlConnection(builder.ConnectionString))
             {
-                client.Connect();
-                if (client.IsConnected)
+                con.Open();
+                using (var cmd = new MySqlCommand("select * from Jogos", con))
                 {
-                    var portForwarded = new ForwardedPortLocal(BOUND_HOST, BOUND_PORT, HOST, PORT);
-                    client.AddForwardedPort(portForwarded);
-                    portForwarded.Start();
-                    using (var con = new MySqlConnection(CS))
+                    cmd.CommandType = CommandType.Text;
+                    var rdr = cmd.ExecuteReader();
+                    while (rdr.Read())
                     {
-                        using (var cmd = new MySqlCommand("select * from Jogos", con))
+                        jogos.Add(new Jogo
                         {
-                            cmd.CommandType = CommandType.Text;
-                            con.Open();
-                            var rdr = cmd.ExecuteReader();
-                            while (rdr.Read())
-                            {
-                                jogos.Add(new Jogo
-                                {
-                                    Id = Convert.ToInt32(rdr["ID_JOGO"]),
-                                    DataCriacao = Convert.ToDateTime(rdr["Data_Criacao"]),
-                                    Nome = Convert.ToString(rdr["Nome"]),
-                                    Versao = Convert.ToInt32(rdr["Versao"]),
-                                    Fases = Convert.ToInt32(rdr["Fases"]),
-                                });
-                            }
-                        }
+                            Id = Convert.ToInt32(rdr["ID_JOGO"]),
+                            DataCriacao = Convert.ToDateTime(rdr["Data_Criacao"]),
+                            Nome = Convert.ToString(rdr["Nome"]),
+                            Versao = Convert.ToInt32(rdr["Versao"]),
+                            Fases = Convert.ToInt32(rdr["Fases"]),
+                        });
                     }
-                    client.Disconnect();
                 }
+                con.Close();
             }
             return jogos;
         }
 
         public void InsertNew(Jogo jogo)
         {
-            using (var client = new SshClient(SSH_HOST, SSH_USER, SSH_PASSWORD))
+            using (var con = new MySqlConnection(builder.ConnectionString))
             {
-                client.Connect();
-                if (client.IsConnected)
+                con.Open();
+                using (var cmd = new MySqlCommand("insert into Jogos (Nome, Data_Criacao, Versao, Fases) values (@Nome, NOW(), @Versao, @Fases)", con))
                 {
-                    var portForwarded = new ForwardedPortLocal(BOUND_HOST, BOUND_PORT, HOST, PORT);
-                    client.AddForwardedPort(portForwarded);
-                    portForwarded.Start();
-                    using (MySqlConnection con = new MySqlConnection(CS))
-                    {
-                        using (var cmd = new MySqlCommand("insert into Jogos (Nome, Data_Criacao, Versao, Fases) values (@Nome, NOW(), @Versao, @Fases)", con))
-                        {
-                            cmd.CommandType = CommandType.Text;
-                            cmd.Parameters.Add(new MySqlParameter("@Nome", jogo.Nome));
-                            cmd.Parameters.Add(new MySqlParameter("@Versao", jogo.Versao));
-                            cmd.Parameters.Add(new MySqlParameter("@Fases", jogo.Fases));
-                            con.Open();
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-                    client.Disconnect();
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.Add(new MySqlParameter("@Nome", jogo.Nome));
+                    cmd.Parameters.Add(new MySqlParameter("@Versao", jogo.Versao));
+                    cmd.Parameters.Add(new MySqlParameter("@Fases", jogo.Fases));
+                    cmd.ExecuteNonQuery();
                 }
+                con.Close();
             }
         }
 
         public void Update(Jogo jogo)
         {
-            using (var client = new SshClient(SSH_HOST, SSH_USER, SSH_PASSWORD))
+            using (var con = new MySqlConnection(builder.ConnectionString))
             {
-                client.Connect();
-                if (client.IsConnected)
+                con.Open();
+                using (var cmd = new MySqlCommand("update Jogos set Nome=@Nome, Versao=@Versao, Fases=@Fases where ID_JOGO=@ID_JOGO", con))
                 {
-                    var portForwarded = new ForwardedPortLocal(BOUND_HOST, BOUND_PORT, HOST, PORT);
-                    client.AddForwardedPort(portForwarded);
-                    portForwarded.Start();
-                    using (MySqlConnection con = new MySqlConnection(CS))
-                    {
-                        using (var cmd = new MySqlCommand("update Jogos set Nome=@Nome, Versao=@Versao, Fases=@Fases where ID_JOGO=@ID_JOGO", con))
-                        {
-                            cmd.CommandType = CommandType.Text;
-                            cmd.Parameters.Add(new MySqlParameter("@Nome", jogo.Nome));
-                            cmd.Parameters.Add(new MySqlParameter("@Versao", jogo.Versao));
-                            cmd.Parameters.Add(new MySqlParameter("@Fases", jogo.Fases));
-                            cmd.Parameters.Add(new MySqlParameter("@ID_JOGO", jogo.Id));
-                            con.Open();
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-                    client.Disconnect();
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.Add(new MySqlParameter("@Nome", jogo.Nome));
+                    cmd.Parameters.Add(new MySqlParameter("@Versao", jogo.Versao));
+                    cmd.Parameters.Add(new MySqlParameter("@Fases", jogo.Fases));
+                    cmd.Parameters.Add(new MySqlParameter("@ID_JOGO", jogo.Id));
+                    con.Open();
+                    cmd.ExecuteNonQuery();
                 }
+                con.Close();
             }
         }
     }

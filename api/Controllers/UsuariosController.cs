@@ -53,6 +53,8 @@ namespace api.Controllers
         {
             try
             {
+                if (usuario == null)
+                    return BadRequest();
                 usuariosBusiness.InsertNew(usuario);
                 return Ok();
             }

@@ -52,6 +52,8 @@ namespace api.Controllers
         {
             try
             {
+                if (jogo == null)
+                    throw new NullReferenceException();
                 jogosBusiness.InsertNew(jogo);
                 return Ok();
             }
