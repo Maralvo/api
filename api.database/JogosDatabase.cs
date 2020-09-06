@@ -1,5 +1,5 @@
-﻿using api.database.common;
-using api.interfaces;
+﻿using api.interfaces;
+using api.model;
 using api.Models;
 using MySql.Data.MySqlClient;
 using Renci.SshNet;
@@ -10,16 +10,23 @@ using System.Text;
 
 namespace api.database
 {
-    public class JogosDatabase : BaseAdo, IJogos
+    public class JogosDatabase : IJogos
     {
-
-        public JogosDatabase()
+        private readonly MySqlConnectionStringBuilder _builder;
+        public JogosDatabase(MysqlConfiguration mysqlConfiguration)
         {
-
+            _builder = new MySqlConnectionStringBuilder
+            {
+                UserID = mysqlConfiguration.UserID,
+                Password = mysqlConfiguration.Password,
+                Server = mysqlConfiguration.Server,
+                Database = mysqlConfiguration.Database,
+            };
         }
+
         public void Delete(Jogo jogo)
         {
-            using (var con = new MySqlConnection(builder.ConnectionString))
+            using (var con = new MySqlConnection(_builder.ConnectionString))
             {
                 con.Open();
                 using (var cmd = new MySqlCommand("delete from Jogos where ID_JOGO=@id", con))
@@ -35,7 +42,7 @@ namespace api.database
         public Jogo GetJogoById(int? id)
         {
 
-            using (var con = new MySqlConnection(builder.ConnectionString))
+            using (var con = new MySqlConnection(_builder.ConnectionString))
             {
                 con.Open();
                 using (var cmd = new MySqlCommand("select * from Jogos where ID_JOGO=@id", con))
@@ -65,7 +72,7 @@ namespace api.database
         {
             var jogos = new List<Jogo>();
 
-            using (var con = new MySqlConnection(builder.ConnectionString))
+            using (var con = new MySqlConnection(_builder.ConnectionString))
             {
                 con.Open();
                 using (var cmd = new MySqlCommand("select * from Jogos", con))
@@ -91,7 +98,7 @@ namespace api.database
 
         public void InsertNew(Jogo jogo)
         {
-            using (var con = new MySqlConnection(builder.ConnectionString))
+            using (var con = new MySqlConnection(_builder.ConnectionString))
             {
                 con.Open();
                 using (var cmd = new MySqlCommand("insert into Jogos (Nome, Data_Criacao, Versao, Fases) values (@Nome, NOW(), @Versao, @Fases)", con))
@@ -108,7 +115,7 @@ namespace api.database
 
         public void Update(Jogo jogo)
         {
-            using (var con = new MySqlConnection(builder.ConnectionString))
+            using (var con = new MySqlConnection(_builder.ConnectionString))
             {
                 con.Open();
                 using (var cmd = new MySqlCommand("update Jogos set Nome=@Nome, Versao=@Versao, Fases=@Fases where ID_JOGO=@ID_JOGO", con))

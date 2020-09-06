@@ -9,34 +9,34 @@ namespace api.facade
 {
     public class JogosFacade : IJogos
     {
-        private readonly JogosDatabase jogosDatabase;
-        public JogosFacade()
+        private readonly IJogos _jogos;
+        public JogosFacade(IJogos jogos)
         {
-            jogosDatabase = new JogosDatabase();
+            _jogos = jogos;
         }
         public void Delete(Jogo jogo)
         {
-            jogosDatabase.Delete(jogo);
+            _jogos.Delete(jogo);
         }
 
         public Jogo GetJogoById(int? id)
         {
-            return jogosDatabase.GetJogoById(id);
+            return _jogos.GetJogoById(id);
         }
 
         public IList<Jogo> GetJogos()
         {
-            return jogosDatabase.GetJogos();
+            return _jogos.GetJogos();
         }
 
         public void InsertNew(Jogo jogo)
         {
-            jogosDatabase.InsertNew(jogo);
+            _jogos.InsertNew(jogo);
         }
 
         public void Update(Jogo jogo)
         {
-            jogosDatabase.Update(jogo);
+            _jogos.Update(jogo);
         }
     }
 }

@@ -7,36 +7,36 @@ namespace api.facade
 {
     public class JogadaFacade : IJogadas
     {
-        private readonly JogadasDatabase jogadasDatabase;
+        private readonly IJogadas _jogadas;
 
-        public JogadaFacade()
+        public JogadaFacade(IJogadas jogadas)
         {
-            jogadasDatabase = new JogadasDatabase();
+            _jogadas = jogadas;
         }
 
         public void Delete(Jogada jogada)
         {
-            jogadasDatabase.Delete(jogada);
+            _jogadas.Delete(jogada);
         }
 
         public Jogada GetJogadaById(int? id)
         {
-            return jogadasDatabase.GetJogadaById(id);
+            return _jogadas.GetJogadaById(id);
         }
 
         public IList<Jogada> GetJogadas()
         {
-            return jogadasDatabase.GetJogadas();
+            return _jogadas.GetJogadas();
         }
 
         public void InsertNew(Jogada jogada)
         {
-            jogadasDatabase.InsertNew(jogada);
+            _jogadas.InsertNew(jogada);
         }
 
         public void Update(Jogada jogada)
         {
-            jogadasDatabase.Update(jogada);
+            _jogadas.Update(jogada);
         }
     }
 }

@@ -9,35 +9,35 @@ namespace api.business
 {
     public class JogosBusiness : IJogos
     {
-        private readonly JogosFacade jogosFacade;
-        public JogosBusiness()
+        private readonly JogosFacade _jogosFacade;
+        public JogosBusiness(JogosFacade jogosFacade)
         {
-            jogosFacade = new JogosFacade();
+            _jogosFacade = jogosFacade;
         }
 
         public void Delete(Jogo jogo)
         {
-            jogosFacade.Delete(jogo);
+            _jogosFacade.Delete(jogo);
         }
 
         public Jogo GetJogoById(int? id)
         {
-            return jogosFacade.GetJogoById(id);
+            return _jogosFacade.GetJogoById(id);
         }
 
         public IList<Jogo> GetJogos()
         {
-            return jogosFacade.GetJogos();
+            return _jogosFacade.GetJogos();
         }
 
         public void InsertNew(Jogo jogo)
         {
-            jogosFacade.InsertNew(jogo);
+            _jogosFacade.InsertNew(jogo);
         }
 
         public void Update(Jogo jogo)
         {
-            jogosFacade.Update(jogo);
+            _jogosFacade.Update(jogo);
         }
     }
 }

@@ -1,27 +1,30 @@
-﻿using api.database.common;
-using api.interfaces;
+﻿using api.interfaces;
+using api.model;
 using api.Models;
 using MySql.Data.MySqlClient;
-using Renci.SshNet;
-using Renci.SshNet.Common;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Text;
 
 namespace api.database
 {
-    public class UsuariosDatabase : BaseAdo, IUsuarios
+    public class UsuariosDatabase : IUsuarios
     {
-
-        public UsuariosDatabase()
+        private readonly MySqlConnectionStringBuilder _builder;
+        public UsuariosDatabase(MysqlConfiguration mysqlConfiguration)
         {
-
+            _builder = new MySqlConnectionStringBuilder
+            {
+                UserID = mysqlConfiguration.UserID,
+                Password = mysqlConfiguration.Password,
+                Server = mysqlConfiguration.Server,
+                Database = mysqlConfiguration.Database,
+            };
         }
 
         public void Delete(Usuario usuario)
         {
-            using (var con = new MySqlConnection(builder.ConnectionString))
+            using (var con = new MySqlConnection(_builder.ConnectionString))
             {
                 con.Open();
                 using (var cmd = new MySqlCommand("delete from Usuarios where ID_Usuario=@id", con))
@@ -36,7 +39,7 @@ namespace api.database
 
         public Usuario GetUserById(int? id)
         {
-            using (var con = new MySqlConnection(builder.ConnectionString))
+            using (var con = new MySqlConnection(_builder.ConnectionString))
             {
                 con.Open();
                 using (var cmd = new MySqlCommand("select * from Usuarios where ID_Usuario=@id", con))
@@ -64,7 +67,7 @@ namespace api.database
         {
             var users = new List<Usuario>();
 
-            using (var con = new MySqlConnection(builder.ConnectionString))
+            using (var con = new MySqlConnection(_builder.ConnectionString))
             {
                 con.Open();
                 using (var cmd = new MySqlCommand("select * from Usuarios", con))
@@ -88,7 +91,7 @@ namespace api.database
 
         public void InsertNew(Usuario usuario)
         {
-            using (var con = new MySqlConnection(builder.ConnectionString))
+            using (var con = new MySqlConnection(_builder.ConnectionString))
             {
                 con.Open();
                 using (var cmd = new MySqlCommand("usuario_inserir", con))
@@ -104,7 +107,7 @@ namespace api.database
 
         public void Update(Usuario usuario)
         {
-            using (var con = new MySqlConnection(builder.ConnectionString))
+            using (var con = new MySqlConnection(_builder.ConnectionString))
             {
                 con.Open();
                 using (var cmd = new MySqlCommand("update Usuarios set Nome=@nome, Pontos=@pontos where ID_Usuario=@id", con))

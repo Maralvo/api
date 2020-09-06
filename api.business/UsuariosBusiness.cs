@@ -4,41 +4,45 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using api.interfaces;
+using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace api.business
 {
-    public class UsuariosBusiness : IUsuarios
+    public class UsuariosBusiness
     {
-        private readonly UsuariosFacade usuariosFacade;
+        private readonly UsuariosFacade _usuariosFacade;
+        private readonly ILogger<UsuariosBusiness> _logger;
 
-        public UsuariosBusiness()
+        public UsuariosBusiness(UsuariosFacade usuariosFacade, ILogger<UsuariosBusiness> logger)
         {
-            usuariosFacade = new UsuariosFacade();
+            _usuariosFacade = usuariosFacade;
+            _logger = logger;
         }
 
         public void Delete(Usuario usuario)
         {
-            usuariosFacade.Delete(usuario);
+            _usuariosFacade.Delete(usuario);
         }
 
         public Usuario GetUserById(int? id)
         {
-            return usuariosFacade.GetUserById(id);
+            return _usuariosFacade.GetUserById(id);
         }
 
         public IList<Usuario> GetUsers()
         {
-            return usuariosFacade.GetUsers();
+            return _usuariosFacade.GetUsers();
         }
 
         public void InsertNew(Usuario usuario)
         {
-            usuariosFacade.InsertNew(usuario);
+            _usuariosFacade.InsertNew(usuario);
         }
 
         public void Update(Usuario usuario)
         {
-            usuariosFacade.Update(usuario);
+            _usuariosFacade.Update(usuario);
         }
     }
 }

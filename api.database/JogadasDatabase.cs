@@ -1,26 +1,30 @@
-﻿using api.database.common;
-using api.interfaces;
+﻿using api.interfaces;
+using api.model;
 using api.Models;
 using MySql.Data.MySqlClient;
-using Renci.SshNet;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Text;
 
 namespace api.database
 {
-    public class JogadasDatabase : BaseAdo, IJogadas
+    public class JogadasDatabase : IJogadas
     {
-
-        public JogadasDatabase()
+        private readonly MySqlConnectionStringBuilder _builder;
+        public JogadasDatabase(MysqlConfiguration mysqlConfiguration)
         {
-
+            _builder = new MySqlConnectionStringBuilder
+            {
+                UserID = mysqlConfiguration.UserID,
+                Password = mysqlConfiguration.Password,
+                Server = mysqlConfiguration.Server,
+                Database = mysqlConfiguration.Database,
+            };
         }
 
         public void Delete(Jogada jogada)
         {
-            using (var connection = new MySqlConnection(builder.ConnectionString))
+            using (var connection = new MySqlConnection(_builder.ConnectionString))
             {
                 connection.Open();
                 using (var cmd = new MySqlCommand("delete from Jogadas where ID_JOGADA=@id", connection))
@@ -36,7 +40,7 @@ namespace api.database
 
         public Jogada GetJogadaById(int? id)
         {
-            using (var connection = new MySqlConnection(builder.ConnectionString))
+            using (var connection = new MySqlConnection(_builder.ConnectionString))
             {
                 connection.Open();
                 using (var cmd = new MySqlCommand("select * from Jogadas where ID_JOGADA=@id", connection))
@@ -75,7 +79,7 @@ namespace api.database
         public IList<Jogada> GetJogadas()
         {
             var jogadas = new List<Jogada>();
-            using (var connection = new MySqlConnection(builder.ConnectionString))
+            using (var connection = new MySqlConnection(_builder.ConnectionString))
             {
                 connection.Open();
                 using (var cmd = new MySqlCommand("select * from Jogadas", connection))
@@ -111,41 +115,54 @@ namespace api.database
 
         public void InsertNew(Jogada jogada)
         {
-            using (var connection = new MySqlConnection(builder.ConnectionString))
+            using (var connection = new MySqlConnection(_builder.ConnectionString))
             {
                 connection.Open();
-                using (var cmd = new MySqlCommand("jogada_inserir", connection))
+                var transaction = connection.BeginTransaction();
+                try
                 {
-                    //        using (var client = new SshClient(SSH_HOST, SSH_USER, SSH_PASSWORD))
-                    //{
-                    //    client.Connect();
-                    //    if (client.IsConnected)
-                    //    {
-                    //        var portForwarded = new ForwardedPortLocal(BOUND_HOST, BOUND_PORT, HOST, PORT);
-                    //        client.AddForwardedPort(portForwarded);
-                    //        portForwarded.Start();
-                    //        using (MySqlConnection con = new MySqlConnection(CS))
-                    //        {
-                    //            using (var cmd = new MySqlCommand("jogada_inserir", con))
-                    //            {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.Add(new MySqlParameter("@id_usuario", jogada.Usuario.Id));
-                    cmd.Parameters.Add(new MySqlParameter("@nome_usuario", jogada.Usuario.Nome));
-                    cmd.Parameters.Add(new MySqlParameter("@id_jogo", jogada.Jogo.Id));
-                    cmd.Parameters.Add(new MySqlParameter("@erros", jogada.Erros));
-                    cmd.Parameters.Add(new MySqlParameter("@acertos", jogada.Acertos));
-                    cmd.Parameters.Add(new MySqlParameter("@pontos", jogada.Pontos));
-                    cmd.Parameters.Add(new MySqlParameter("@tempo", jogada.Tempo));
-                    cmd.Parameters.Add(new MySqlParameter("@fases", jogada.Fases));
-                    cmd.ExecuteNonQuery();
+                    using (var cmd = new MySqlCommand("jogada_inserir", connection))
+                    {
+                        //        using (var client = new SshClient(SSH_HOST, SSH_USER, SSH_PASSWORD))
+                        //{
+                        //    client.Connect();
+                        //    if (client.IsConnected)
+                        //    {
+                        //        var portForwarded = new ForwardedPortLocal(BOUND_HOST, BOUND_PORT, HOST, PORT);
+                        //        client.AddForwardedPort(portForwarded);
+                        //        portForwarded.Start();
+                        //        using (MySqlConnection con = new MySqlConnection(CS))
+                        //        {
+                        //            using (var cmd = new MySqlCommand("jogada_inserir", con))
+                        //            {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.Add(new MySqlParameter("@id_usuario", jogada.Usuario.Id));
+                        cmd.Parameters.Add(new MySqlParameter("@nome_usuario", jogada.Usuario.Nome));
+                        cmd.Parameters.Add(new MySqlParameter("@id_jogo", jogada.Jogo.Id));
+                        cmd.Parameters.Add(new MySqlParameter("@erros", jogada.Erros));
+                        cmd.Parameters.Add(new MySqlParameter("@acertos", jogada.Acertos));
+                        cmd.Parameters.Add(new MySqlParameter("@pontos", jogada.Pontos));
+                        cmd.Parameters.Add(new MySqlParameter("@tempo", jogada.Tempo));
+                        cmd.Parameters.Add(new MySqlParameter("@fases", jogada.Fases));
+                        cmd.ExecuteNonQuery();
+                    }
+                    transaction.Commit();
                 }
-                connection.Close();
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    connection.Close();
+                }
             }
         }
 
         public void Update(Jogada jogada)
         {
-            using (var connection = new MySqlConnection(builder.ConnectionString))
+            using (var connection = new MySqlConnection(_builder.ConnectionString))
             {
                 connection.Open();
                 using (var cmd = new MySqlCommand("update Usuarios set ID_USUARIO=@ID_USUARIO, ID_JOGO=@ID_JOGO, Data_Hora=@Data_Hora, Erros=@Erros, Acertos=@Acertos, Pontos=@Pontos, Tempo=@Tempo, Fases=@Fases where ID_JOGADA=@ID_JOGADA", connection))

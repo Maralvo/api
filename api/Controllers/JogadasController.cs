@@ -1,93 +1,115 @@
-﻿using api.business;
-using api.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
-using System.Web.Http.Cors;
+using System.Net.Mime;
+using System.Threading.Tasks;
+using api.business;
+using api.Models;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace api.Controllers
 {
-    public class JogadasController : ApiController
+    [Route("api/[controller]")]
+    [ApiController]
+    public class JogadasController : ControllerBase
     {
-        private readonly JogadasBusiness jogadasBusiness;
+        private readonly JogadasBusiness _jogadasBusiness;
+        private readonly ILogger<JogadasController> _logger;
 
-        public JogadasController()
+        public JogadasController(JogadasBusiness jogadasBusiness, ILogger<JogadasController> logger)
         {
-            jogadasBusiness = new JogadasBusiness();
+            _jogadasBusiness = jogadasBusiness;
+            _logger = logger;
         }
 
         // GET api/<controller>
-        public IHttpActionResult Get()
+        [HttpGet]
+        public IActionResult Get()
         {
             try
             {
-                var jogadas = jogadasBusiness.GetJogadas();
-                return Ok(jogadas);
+                return Ok(_jogadasBusiness.GetJogadas());
             }
             catch (Exception ex)
             {
-                return InternalServerError(ex);
+                return BadRequest(ex);
             }
 
         }
 
         // GET api/<controller>/5
-        public IHttpActionResult Get(int id)
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public IActionResult Get(int id)
         {
             try
             {
-                var jogada = jogadasBusiness.GetJogadaById(id);
-                return jogada == null ? (IHttpActionResult)NotFound() : Ok(jogada);
+                return Ok(_jogadasBusiness.GetJogadaById(id));
             }
             catch (Exception ex)
             {
-                return InternalServerError(ex);
+                return BadRequest(ex);
             }
         }
 
         // POST api/<controller>
-        public IHttpActionResult Post([FromBody] Jogada jogada)
+        [HttpPost]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public IActionResult Post([FromBody] Jogada jogada)
         {
             try
             {
-                jogadasBusiness.InsertNew(jogada);
+                if (jogada == null)
+                    return BadRequest();
+                _jogadasBusiness.InsertNew(jogada);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return InternalServerError(ex);
+                return BadRequest(ex);
             }
         }
 
         // PUT api/<controller>/5
-        public IHttpActionResult Put([FromBody] Jogada jogada)
+        [HttpPut]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public IActionResult Put([FromBody] Jogada jogada)
         {
             try
             {
-                jogadasBusiness.Update(jogada);
+                _jogadasBusiness.Update(jogada);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return InternalServerError(ex);
+                return BadRequest(ex);
             }
         }
 
         // DELETE api/<controller>/5
-        public IHttpActionResult Delete(int id)
+        [HttpDelete]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public IActionResult Delete(int id)
         {
             try
             {
                 var jogadaToDelete = new Jogada { Id = id };
-                jogadasBusiness.Delete(jogadaToDelete);
+                _jogadasBusiness.Delete(jogadaToDelete);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return InternalServerError(ex);
+                return BadRequest(ex);
             }
         }
     }

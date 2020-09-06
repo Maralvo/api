@@ -1,94 +1,114 @@
-﻿using api.business;
-using api.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
+using System.Net.Mime;
+using System.Threading.Tasks;
+using api.business;
+using api.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace api.Controllers
 {
-    public class JogosController : ApiController
+    [Route("api/[controller]")]
+    [ApiController]
+    public class JogosController : ControllerBase
     {
-        private readonly JogosBusiness jogosBusiness;
+        private readonly JogosBusiness _jogosBusiness;
+        private readonly ILogger<JogosController> _logger;
 
-        public JogosController()
+        public JogosController(JogosBusiness jogosBusiness, ILogger<JogosController> logger)
         {
-            jogosBusiness = new JogosBusiness();
+            _jogosBusiness = jogosBusiness;
+            _logger = logger;
         }
 
         // GET api/<controller>
-        public IHttpActionResult Get()
+        [HttpGet]
+        public IActionResult Get()
         {
             try
             {
-                var jogos = jogosBusiness.GetJogos();
-                return Ok(jogos);
+                return Ok(_jogosBusiness.GetJogos());
             }
             catch (Exception ex)
             {
-                return InternalServerError(ex);
+                return BadRequest(ex);
             }
 
         }
 
         // GET api/<controller>/5
-        public IHttpActionResult Get(int id)
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public IActionResult Get(int id)
         {
             try
             {
-                var jogo = jogosBusiness.GetJogoById(id);
-                return jogo == null ? (IHttpActionResult)NotFound() : Ok(jogo);
+                return Ok(_jogosBusiness.GetJogoById(id));
             }
             catch (Exception ex)
             {
-                return InternalServerError(ex);
+                return BadRequest(ex);
             }
         }
 
         // POST api/<controller>
-        public IHttpActionResult Post([FromBody] Jogo jogo)
+        [HttpPost]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public IActionResult Post([FromBody] Jogo jogo)
         {
             try
             {
                 if (jogo == null)
-                    throw new NullReferenceException();
-                jogosBusiness.InsertNew(jogo);
+                    return BadRequest();
+                _jogosBusiness.InsertNew(jogo);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return InternalServerError(ex);
+                return BadRequest(ex);
             }
         }
 
         // PUT api/<controller>/5
-        public IHttpActionResult Put([FromBody] Jogo jogo)
+        [HttpPut]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public IActionResult Put([FromBody] Jogo jogo)
         {
             try
             {
-                jogosBusiness.Update(jogo);
+                _jogosBusiness.Update(jogo);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return InternalServerError(ex);
+                return BadRequest(ex);
             }
         }
 
         // DELETE api/<controller>/5
-        public IHttpActionResult Delete(int id)
+        [HttpDelete]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public IActionResult Delete(int id)
         {
             try
             {
                 var jogoToDelete = new Jogo { Id = id };
-                jogosBusiness.Delete(jogoToDelete);
+                _jogosBusiness.Delete(jogoToDelete);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return InternalServerError(ex);
+                return BadRequest(ex);
             }
         }
     }
