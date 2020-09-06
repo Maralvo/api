@@ -342,3 +342,6 @@ healthchecksdb
 Web.config
 Web.Debug.config
 Web.Release.config
+
+
+appsettings.json
