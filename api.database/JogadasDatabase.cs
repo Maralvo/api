@@ -62,11 +62,11 @@ namespace api.database
                                 Id = Convert.ToInt32(rdr["ID_JOGO"]),
                             },
                             DataHora = Convert.ToDateTime(rdr["Data_Hora"]),
-                            Erros = Convert.ToInt32(rdr["Erros"]),
-                            Acertos = Convert.ToInt32(rdr["Acertos"]),
-                            Pontos = Convert.ToInt32(rdr["Pontos"]),
-                            Tempo = Convert.ToString(rdr["Tempo"]),
-                            Fases = Convert.ToInt32(rdr["Fases"]),
+                            Erros = rdr["Erros"] == DBNull.Value ? (int?) null : Convert.ToInt32(rdr["Erros"]),
+                            Acertos = rdr["Acertos"] == DBNull.Value ? (int?)null : Convert.ToInt32(rdr["Acertos"]),
+                            Pontos = rdr["Pontos"] == DBNull.Value ? (int?)null : Convert.ToInt32(rdr["Pontos"]),
+                            Tempo =Convert.ToString(rdr["Tempo"]),
+                            Fases = rdr["Fases"] == DBNull.Value ? (int?)null : Convert.ToInt32(rdr["Fases"]),
                         };
                     }
                 }
